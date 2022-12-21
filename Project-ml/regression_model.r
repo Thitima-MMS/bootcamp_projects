@@ -1,3 +1,0 @@
-#buikd a regression model
-
-model <- ........
