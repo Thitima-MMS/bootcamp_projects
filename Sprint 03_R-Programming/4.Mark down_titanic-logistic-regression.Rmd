@@ -1,0 +1,126 @@
+---
+title: "R Notebook"
+author: "Thitima Moungsesai"
+output: pdf_document
+---
+
+# **Hello world!**
+I'm learning R Markdown to create documents by using The titanic_train data set for logistic regression to predict binary outcome (0,1)
+
+Format
+Data frame with columns
+
+=> PassengerId : Passenger ID
+
+=> Survived : Passenger Survival Indicator
+
+=> Pclass : Passenger Class
+
+=> Name : Name
+
+=> Sex : Sex
+
+=> Age : Age
+
+=> SibSp : Number of Siblings/Spouses Aboard
+
+=> Parch : Number of Parents/Children Aboard
+
+=> Ticket : Ticket Number
+
+=> Fare : Passenger Fare
+
+=> Cabin : Cabin
+
+=> Embarke : Port of Embarkation
+
+```{r}
+#install.packages("titanic")
+library(titanic)
+library(dplyr)
+
+?titanic_train
+
+```
+# Drop NA (Missing Value)
+```{r}
+titanic_train <- na.omit(titanic_train)
+nrow(titanic_train)
+glimpse(titanic_train)
+
+```
+# Split data
+```{r}
+set.seed(42)
+n<- nrow(titanic_train)
+id<- sample(1:n,size = n*0.7) ##70% train 30% test
+train_data <- titanic_train[id, ]
+nrow(train_data)
+test_data<-titanic_train[-id, ]
+nrow(test_data)
+```
+# **Train data**
+```{r}
+## Train Model
+model_train <- glm(Survived ~ Pclass + Age ,data = train_data,family = "binomial")
+summary(model_train)
+```
+
+```{r}
+## Predict and Evaluate model
+train_data$prob_survived <- predict(model_train,type = "response")
+train_data$preb_survived <- ifelse(train_data$prob_survived >=0.5,1,0)
+```
+
+```{r}
+## Confusion matrix of Train Model
+conM_train <- table(train_data$Survived,train_data$preb_survived,dnn = c("Predicted","Actual"))
+conM_train
+
+acc_train <- (conM_train[1,1] + conM_train[2,2])/sum(conM_train)
+prec_train <- conM_train[2,2] / (conM_train[1,2] + conM_train[2,2])
+rec_train <- conM_train[2,2]/(conM_train[2,1]+conM_train[2,2])
+f1_train <- 2*(( prec_train* rec_train)/(prec_train + rec_train))
+
+cat("Train Model :","\n--------------------","\nAccuracy",acc_train,"\nprecision",prec_train,"\nRecall",rec_train,"\nF1 score",f1_train)
+```
+# **Test data**
+```{r}
+## Test Model
+model_test <- glm(Survived ~ Pclass + Age ,data = test_data,family = "binomial")
+summary(model_test)
+```
+
+```{r}
+## Predict and Evaluate model
+test_data$prob_survived <- predict(model_test,type = "response")
+test_data$preb_survived <- ifelse(test_data$prob_survived >=0.5,1,0)
+```
+
+```{r}
+## Confusion matrix of Test Model
+conM_test <- table(test_data$Survived,test_data$preb_survived,dnn = c("Predicted","Actual"))
+conM_test
+
+acc_test <- (conM_test[1,1] + conM_test[2,2])/sum(conM_test)
+prec_test <- conM_test[2,2] / (conM_test[1,2] + conM_test[2,2])
+rec_test <- conM_test[2,2]/(conM_test[2,1]+conM_test[2,2])
+f1_test <- 2*(( prec_test* rec_test)/(prec_test + rec_test))
+
+cat("\nTest Model :","\n--------------------","\nAccuracy",acc_test,"\nprecision",prec_test,"\nRecall",rec_test,"\nF1 score",f1_test)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

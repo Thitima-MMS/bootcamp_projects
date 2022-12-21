@@ -1,0 +1,156 @@
+---
+title: "R Notebook"
+author: "Thitima Moungsesai"
+output:
+  pdf_document: default
+  html_notebook: default
+  word_document: default
+---
+# **Hello world!**
+I'm learning R Markdown to create documents by using The mtcars data set for exploration.
+
+
+Format
+
+A data frame with 32 observations on 11 (numeric) variables.
+
+
+=> mpg	Miles/(US) gallon
+
+=> cyl	Number of cylinders
+
+=> disp	Displacement (cu.in.)
+
+=> hp	Gross horsepower
+
+=> drat	Rear axle ratio
+
+=> wt	Weight (1000 lbs)
+
+=> qsec	1/4 mile time
+
+=> vs	Engine (0 = V-shaped, 1 = straight)
+
+=> am	Transmission (0 = automatic, 1 = manual)
+
+=> gear	Number of forward gears
+
+=> carb	Number of carburetors
+
+
+```{r}
+library(dplyr)
+library(ggplot2)
+print("Hello word")
+head(mtcars)
+```
+
+# 1.Simple histogram
+
+```{r}
+ggplot(mtcars, 
+       aes(mpg)) +
+  geom_histogram(bins=10)
+```
+
+
+
+
+# 2.Simple boxplot
+
+```{r}
+ggplot(mtcars,aes(mpg))+
+  geom_boxplot()
+```
+
+# EDA => Exploratory Data Analysis
+
+# 3.Find the number of Auto and Manual.
+
+```{r}
+m <- mtcars %>%
+  tibble() %>%
+  mutate(am = factor(if_else(am==0, "Auto", "Manual")))
+
+glimpse(m)
+```
+```{r}
+m %>% 
+  count(am)%>%
+  mutate(pct = n/sum(n))
+
+ggplot(m,aes(am))+
+  geom_bar()
+```
+
+# 4.Find correlation of the weight vs miles per gallon by The scatterplot has a linear model.
+## Result : negative correlation when As the weight increases, the MPG decreases. 
+
+```{r}
+ggplot(m, aes(wt, mpg)) +
+  geom_point(color = "salmon",
+             size = 1,
+             alpha = 0.8) +
+  geom_smooth(method = "lm",
+              color = "black",
+              fill = "blue")+
+  labs(
+    title = "Relationship between weight vs miles per gallon",
+    x = "wt (weight)",
+    y = "mpg(miles per gallon)")
+```
+
+# 5.The scatterplot of the weight vs miles per gallon and represent data point following "vs" column.
+
+```{r}
+ggplot(m,aes(wt,mpg))+
+  geom_point(size = 6,
+             alpha = 0.5,
+             mapping = aes(color = factor(vs)))+
+  labs(
+    title = "Relationship between weight vs miles per gallon",
+    x = "wt (weight)",
+    y = "mpg(miles per gallon)")
+```
+
+# 6.The scatterplot of the weight vs miles per gallon and represent data point following "hp_segment" column.
+
+```{r}
+m %>%
+  select(wt, mpg, hp) %>%
+  mutate(hp_segment = case_when( 
+    hp < 100 ~ "low",
+    hp < 200 ~ "medium",
+    TRUE ~ "high"
+  )) %>% 
+  mutate(hp_segment = factor(   
+      hp_segment,
+      labels = c("low", "medium", "high"),   
+      levels = c("low", "medium", "high"),   
+      ordered = TRUE) ) %>%   
+  ggplot(   mapping = aes(wt, mpg, 
+                       color=hp_segment)) +
+    geom_point(size=4, alpha=0.8) +
+    scale_color_manual(values = c("red",      
+                                  "gold",     
+                                  "blue"))+
+  labs(
+    title = "Relationship between weight vs miles per gallon",
+    x = "wt (weight)",
+    y = "mpg(miles per gallon)")
+```
+
+# 7.Combind Chart
+
+```{r}
+library(ggplot2)
+library(patchwork)
+p1 <- ggplot(mtcars, aes(hp)) + geom_histogram(bins=10)
+p2 <- ggplot(mtcars, aes(mpg)) + geom_density()
+p3 <- ggplot(diamonds, aes(cut, fill=cut)) + geom_bar()
+
+
+
+( p1 + p2 ) / p3 
+```
+

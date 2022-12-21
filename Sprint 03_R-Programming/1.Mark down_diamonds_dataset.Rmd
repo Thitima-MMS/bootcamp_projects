@@ -1,0 +1,101 @@
+---
+title: "R Notebook"
+author: "Thitima Moungsesai"
+output:
+  pdf_document: default
+  html_notebook: default
+---
+
+# **Hello world!**
+I'm learning R Markdown to create documents by using The Diamonds data set for exploration.
+
+
+Format
+
+=> data frame with 53940 rows and 10 variables:
+
+=> Price : price in US dollars (\$326–\$18,823)
+
+=> carat : weight of the diamond (0.2–5.01)
+
+=> cut : quality of the cut (Fair, Good, Very Good, Premium, Ideal)
+
+=> color : diamond colour, from D (best) to J (worst)
+
+=> clarity : a measurement of how clear the diamond is (I1 (worst), SI2, SI1, VS2, VS1, VVS2, VVS1, IF (best))
+
+=> x : length in mm (0–10.74)
+
+=> y : width in mm (0–58.9)
+
+=> z : depth in mm (0–31.8)
+
+=> depth : total depth percentage = z / mean(x, y) = 2 * z / (x + y) (43–79)
+
+=> table : width of top of diamond relative to widest point (43–95)
+
+
+```{r}
+library(dplyr)
+library('ggplot2')
+print("Hello world")
+head(diamonds)
+```
+## Diamonds exploration
+## 1.Explore the number of cut.
+```{r}
+ggplot(diamonds,aes(cut,fill = cut))+geom_bar()
+```
+
+# 2.Explore by use bar graph for compare proportion the color of each cut.
+```{r}
+ggplot(diamonds,aes(cut,fill = color))+geom_bar(position = "fill")+
+  theme_minimal()
+```
+
+# 3.Explore correlation by Scatter Plot : x is carat, y is price.
+## Result :  positive correlation
+```{r}
+set.seed(42)
+ggplot(sample_n(diamonds,1000),
+      aes(carat,price))+
+      geom_point(alpha=0.5)+
+      geom_smooth(method = "lm")+
+  labs(
+    title = "Relationship between carat and price of diamonds ",
+    x = "Carat",
+    y = "Price (USD)",
+    subtitle = "using ggplot to create this visualization",
+    caption =  "Source : ggplot package" 
+  )
+```
+
+# 4.Explore data and isolate graph by function : facet_wrap "Relationship between carat, price and cut of diamonds "
+```{r}
+set.seed(42)
+ggplot(sample_n(diamonds,7000),
+      aes(carat,price,color=cut))+
+      geom_point(alpha=0.5)+
+      geom_smooth(method = "lm")+
+  labs(
+    title = "Relationship between carat, price and cut of diamonds ",
+    x = "Carat",
+    y = "Price (USD)",
+    subtitle = "using ggplot to create this visualization",
+    caption =  "Source : ggplot package" 
+  )+
+  facet_wrap(~cut,ncol=5)
+```
+
+# 5.Explore data and isolate graph by function : facet_grid "Relationship between carat, price and cut of diamonds "
+
+```{r}
+set.seed(25)
+diamonds %>%
+  sample_n(10000) %>%
+  ggplot( aes(carat, price)) +
+  geom_point(alpha=0.4) +
+  geom_smooth() +
+  theme_minimal() +
+  facet_grid(cut ~ color)   #cross between : x=cut, y=color
+```

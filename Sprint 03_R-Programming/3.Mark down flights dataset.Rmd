@@ -1,0 +1,158 @@
+---
+title: "R Notebook"
+author: "Thitima Moungsesai"
+output:
+  pdf_document: default
+  html_notebook: default
+  word_document: default
+---
+# **Hello world!**
+I'm learning R Markdown to create documents by using The flights data set for exploration.
+
+=> year, month, day : Date of departure.
+
+=>dep_time, arr_time : Actual departure and arrival times (format HHMM or HMM), local tz.
+
+=> sched_dep_time, sched_arr_time : Scheduled departure and arrival times (format HHMM or HMM), local tz.
+
+=> dep_delay, arr_delay : Departure and arrival delays, in minutes. Negative times represent early departures/arrivals.
+
+=> carrier: Two letter carrier abbreviation. See airlines to get name.
+
+=> flight : Flight number.
+
+=> tailnum : Plane tail number. See planes for additional metadata.
+
+=> origin, dest : Origin and destination. See airports for additional metadata.
+
+=> air_time : Amount of time spent in the air, in minutes.
+
+=> distance : Distance between airports, in miles.
+
+=> hour, minute : Time of scheduled departure broken into hour and minutes.
+
+=> time_hour : Scheduled date and hour of the flight as a POSIXct date. Along with origin, can be used to join flights data to weather data.
+
+```{r}
+#install.packages("knitr")
+library(knitr)
+#install.packages("tinytex")
+#tinytex::install_tinytex()
+
+library(dplyr)
+library(nycflights13)
+library(ggplot2)
+
+#View(flights)
+```
+# 1.How many flight of each month?
+```{r}
+
+flights%>%
+  count(month)%>%
+  arrange(desc(n))
+
+ggplot(flights,aes(factor(month)))+
+  geom_bar()+
+  labs(title = "month vs total flights of each month",
+    x = "month",
+    y = "total flights of each month",
+    subtitle = "using ggplot to create this visualization",
+    caption =  "Source : ggplot package" )
+```
+
+# 2.Explore data by use bar graph for compare proportion the month of each carrier.
+
+```{r}
+ggplot(flights,aes(factor(month),fill=carrier))+
+geom_bar(position = "fill")+
+  labs(title = "month vs total flights of each month",
+    x = "month",
+    y = "total flights of each month",
+    subtitle = "using ggplot to create this visualization",
+    caption =  "Source : ggplot package" )
+```
+
+# 3.Which carrier had most flights in May 2013?
+## Result : the carrier had the most flights is UA
+```{r}
+flights%>%
+  filter(month == 5,year == 2013)%>%
+  count(carrier)%>%
+  arrange(desc(n))
+
+flights%>%
+  filter(month == 5,year == 2013)%>%
+  ggplot(aes(carrier,fill=carrier))+
+  geom_bar()+
+  labs(title = "carrier vs total flights in May 2013",
+    x = "carrier",
+    y = "total flights",
+    subtitle = "using ggplot to create this visualization",
+    caption =  "Source : ggplot package" 
+  )
+
+```
+
+# 4.Where is the Top 10 of destination that people are popular to go?
+## Result : ORD >> ATL >> LAX >> BOS >> MCO >> CLT >> SFO >> FLL >> MIA >> DCA 
+
+```{r}
+A <-flights%>%
+  count(dest)%>%
+  arrange(desc(n))%>%
+  head(10)
+A
+  ggplot(A,aes(dest,n))+
+    geom_col(position = "stack")+
+    geom_text(aes(label=n), vjust=-0.25)+
+    labs(title = "Destination vs flights ",
+    x = "Destination",
+    y = "flights",
+    subtitle = "using ggplot to create this visualization",
+    caption =  "Source : ggplot package" )
+```
+
+# 5.Which carrier has the most airtime?
+## Result : The carrier has most airtime is UA
+
+```{r}
+flights %>%
+    filter(!is.na(air_time))%>%
+    group_by(carrier)%>%
+    summarise(total_air_time_Hrs = round(sum(air_time)/60,2))
+
+
+flights %>%
+    filter(!is.na(air_time))%>%
+    group_by(carrier)%>%
+    summarise(total_air_time_Hrs = round(sum(air_time)/60,2))%>%
+    arrange(desc(total_air_time_Hrs)) %>%
+ggplot(aes(carrier,total_air_time_Hrs))+
+geom_col(position = "stack")+
+  labs(title = "Carrier vs total_air_time_Hrs ",
+    x = "Carrier",
+    y = "total_air_time_Hrs",
+    subtitle = "using ggplot to create this visualization",
+    caption =  "Source : ggplot package" )
+```
+
+# 6.Find the trends of flights for each carrier in 2013
+## Result : Almost the trend of flight for carrier to be stable except "OO","MQ",Which have decreased.
+```{r}
+ggplot(flights,
+      aes(month,flight,color=carrier))+
+      geom_smooth(method = "lm")+
+  labs(
+    title = "Relationship month, flight of carrier ",
+    x = "month",
+    y = "flight",
+    subtitle = "using ggplot to create this visualization",
+    caption =  "Source : ggplot package" )+
+    facet_wrap(~carrier,ncol=5)
+```
+
+
+
+
+
